@@ -1,14 +1,11 @@
-// Global variables
 let rawData, map, heatLayer;
 let aggregatedPoints = [];
 let timelapseActive = false;
 let timelapseInterval;
 let updateTimeout;
 
-// Use the exact number you found to lock the color scales
 const globalMaxDensity = 1500; 
 
-// Debounce function for smooth slider performance
 function debounce(func, wait) {
     return function executedFunction(...args) {
         const later = () => {
@@ -20,23 +17,18 @@ function debounce(func, wait) {
     };
 }
 
-// 1. Initialize Map
 async function init() {
     try {
-        // Initialize Leaflet map
         map = L.map('base-map').setView([48.0, 10.0], 5);
 
-        // Add CartoDB Base Map
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; OpenStreetMap &copy; CARTO',
             subdomains: 'abcd',
             maxZoom: 10
         }).addTo(map);
 
-        // Add Scale Bar
         L.control.scale({ imperial: true, position: 'bottomright' }).addTo(map);
 
-        // Setup the Leaflet Heat Layer
         heatLayer = L.heatLayer([], {
             radius: 15,            
             blur: 20,              
@@ -52,12 +44,9 @@ async function init() {
             }
         }).addTo(map);
 
-        // Load operations data
         rawData = await d3.json("operations.json");
 
-        // Set up slider and perform initial draw
 
-        // --- THE DROPPER TOOL ---
         map.on('mousemove', function(e) {
             if (!aggregatedPoints.length) return;
 
@@ -65,11 +54,9 @@ async function init() {
             const mouseLat = e.latlng.lat;
             const mouseLng = e.latlng.lng;
             
-            // Search radius: 0.15 degrees is roughly a 10-15km box around the cursor
             const searchRadius = 0.15; 
             let localTons = 0;
 
-            // Fast bounding-box search to find bombs near the mouse
             for (let i = 0; i < aggregatedPoints.length; i++) {
                 const pt = aggregatedPoints[i];
                 if (Math.abs(pt.lat - mouseLat) < searchRadius && Math.abs(pt.lon - mouseLng) < searchRadius) {
@@ -77,15 +64,12 @@ async function init() {
                 }
             }
 
-            // If we found bombs, show the tooltip and make it follow the mouse
             if (localTons > 0) {
                 document.getElementById('hover-tons').textContent = Math.round(localTons).toLocaleString();
                 tooltip.style.display = 'block';
-                // Offset by 15px so it doesn't get stuck directly under the mouse arrow
                 tooltip.style.left = (e.containerPoint.x + 15) + 'px';
                 tooltip.style.top = (e.containerPoint.y + 15) + 'px';
             } else {
-                // Hide tooltip if pointing at empty space
                 tooltip.style.display = 'none';
             }
         });
@@ -103,7 +87,6 @@ async function init() {
     }
 }
 
-// 2. Setup Slider
 function initSlider() {
     const dateSlider = document.getElementById('slider-date');
     
@@ -149,7 +132,6 @@ function initSlider() {
     window.dateSlider = dateSlider;
 }
 
-// 3. Filter Data
 function filterData(data) {
     if (!window.dateSlider || !window.dateSlider.noUiSlider) return data;
     
@@ -162,7 +144,6 @@ function filterData(data) {
     });
 }
 
-// Update Data State
 function updateData() {
     if (!rawData || !rawData.locations) return;
 
@@ -186,11 +167,9 @@ function updateData() {
     drawHeatmap();
 }
 
-// 5. Render Heatmap on Leaflet
 function drawHeatmap() {
     if (!heatLayer || !aggregatedPoints.length) return;
 
-    // Convert to Leaflet's preferred format: [Lat, Lon, Intensity]
     const leafletPoints = aggregatedPoints.map(point => [
         point.lat, 
         point.lon, 
@@ -200,18 +179,13 @@ function drawHeatmap() {
     heatLayer.setLatLngs(leafletPoints);
 }
 
-// 6. Update HTML Statistics
 function updateStats(operationsCount) {
-    // Update operations count
     document.getElementById('operations-count').textContent = operationsCount.toLocaleString();
     
     if (aggregatedPoints.length > 0) {
-        // CALCULATE NEW STAT: Add up every single ton dropped on the map right now
         const totalTons = d3.sum(aggregatedPoints, d => d.count);
-        // Math.round() prevents ugly decimals like "1,245.67 tons"
         document.getElementById('total-tons').textContent = Math.round(totalTons).toLocaleString();
 
-        // Calculate peak intensity (The single hottest spot on the map)
         const maxIntensity = d3.max(aggregatedPoints, d => d.count);
         document.getElementById('peak-intensity').textContent = Math.round(maxIntensity).toLocaleString();
     } else {
@@ -221,7 +195,6 @@ function updateStats(operationsCount) {
     }
 }
 
-// 7. Dynamic Timelapse Controls
 function togglePlayback() {
     timelapseActive = !timelapseActive;
     const playIcon = document.getElementById('play-icon');
@@ -262,7 +235,7 @@ function startTimelapse() {
         if (currentTime > absoluteMax) {
             currentTime = absoluteMax;
             window.dateSlider.noUiSlider.set([leftHandle, currentTime]);
-            togglePlayback(); // Auto-pause at the end
+            togglePlayback(); 
             return;
         }
 
@@ -287,5 +260,4 @@ function resetView() {
     window.dateSlider.noUiSlider.set([sliderRange.min, sliderRange.max]);
 }
 
-// Start application
 init();
