@@ -6,7 +6,7 @@ let timelapseInterval;
 let updateTimeout;
 
 // Use the exact number you found to lock the color scales
-const globalMaxDensity = 1000; 
+const globalMaxDensity = 1500; 
 
 // Debounce function for smooth slider performance
 function debounce(func, wait) {
@@ -127,7 +127,7 @@ function initSlider() {
         document.getElementById('event-end')
     ];
 
-    const formatMonth = d3.timeFormat("%b %Y");
+    const formatMonth = d3.timeFormat("%b %d, %Y");
 
     const debouncedUpdate = debounce(() => {
         updateData();
@@ -282,6 +282,7 @@ function stopTimelapse() {
 
 function resetView() {
     if (!window.dateSlider || !window.dateSlider.noUiSlider) return;
+    stopTimelapse()
     const sliderRange = window.dateSlider.noUiSlider.options.range;
     window.dateSlider.noUiSlider.set([sliderRange.min, sliderRange.max]);
 }
