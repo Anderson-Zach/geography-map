@@ -46,7 +46,7 @@ dateSlider.noUiSlider.on('change', function (values, handle) {
 dateSlider.noUiSlider.on('set', function (values, handle) {
     dateRanges[0] = +values[0];
     dateRanges[1] = +values[1];
-
+    console.log("updateing")
     updateData();
 });
 

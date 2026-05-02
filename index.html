@@ -3,43 +3,159 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>WWII Europe Bombing Map</title>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WWII Allied Bombing Operations</title>
 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+    <div class="container">
+        <header>
+            <h1>WWII Allied Bombing Operations</h1>
+            <p class="subtitle">European Theater • 1939-1945</p>
+        </header>
 
-    <h2>WWII Allied Bombing Operations</h2>
-    <div style="width: 500px;" id="slider-date"></div>
-    
-    <button class="btn btn-danger" onclick="updateData()">Update</button>
-    <button class="btn btn-danger" onclick="playInterval()"> Play timelapse</button>
-    
-    <div class="input-group mb-3">
-        <span class="input-group-text" id="basic-addon1">Start:</span>
-        <input id="event-start" type="text" class="form-control" placeholder="01/08/1939" aria-label="Username"
-            aria-describedby="basic-addon1">
-    </div>
-    <div class="input-group mb-3">
-        <span  class="input-group-text" id="basic-addon1">End:</span>
-        <input id="event-end" type="text" class="form-control" placeholder="13/05/1945">
+        <div class="grid-layout">
+            <aside class="controls-panel">
+                <section class="control-section">
+                    <h3>Date Range</h3>
+                    <div class="date-inputs">
+                        <div class="date-input-group">
+                            <label>Start</label>
+                            <input id="event-start" type="text" readonly value="Aug 1939">
+                        </div>
+                        <div class="date-input-group">
+                            <label>End</label>
+                            <input id="event-end" type="text" readonly value="May 1945">
+                        </div>
+                    </div>
+                    <div id="slider-date" class="date-slider"></div>
+                </section>
+
+                <section class="control-section">
+                    <h3>Playback</h3>
+                    <button class="btn btn-primary" id="play-btn" onclick="togglePlayback()">
+                        <span id="play-icon">▶</span> <span id="play-text">Play Timelapse</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetView()">
+                        ↻ Reset View
+                    </button>
+                </section>
+
+
+                <section class="stats-panel">
+                    <h3>Statistics</h3>
+                    <div class="stat-item">
+                        <div class="stat-label">Operations</div>
+                        <div class="stat-value" id="operations-count">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Total Tons Dropped</div>
+                        <div class="stat-value" id="total-tons">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Peak Tonnage (1 Spot)</div>
+                        <div class="stat-value" id="peak-intensity">0</div>
+                    </div>
+                </section>
+
+                <section class="legend">
+                    <h3>Intensity Scale (Tons)</h3>
+                    <div class="legend-gradient">
+                        <svg width="100%" height="60" viewBox="0 0 300 60">
+                            <defs>
+                                <linearGradient id="heatmap-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#0064ff;stop-opacity:1" />
+                                    <stop offset="25%" style="stop-color:#00ffff;stop-opacity:1" />
+                                    <stop offset="50%" style="stop-color:#ffff00;stop-opacity:1" />
+                                    <stop offset="75%" style="stop-color:#ff9900;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#ff0000;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <rect x="10" y="10" width="280" height="20" fill="url(#heatmap-gradient)" rx="3" />
+
+                            <text x="10" y="45" text-anchor="start" class="legend-label">0</text>
+                            <text x="150" y="45" text-anchor="middle" class="legend-label">1,250</text>
+                            <text x="290" y="45" text-anchor="end" class="legend-label">2,500+ Tons</text>
+                        </svg>
+                    </div>
+                </section>
+            </aside>
+
+            <main class="map-section">
+                <div id="map-container">
+                    <div id="base-map"></div>
+                    
+                    <div id="hover-tooltip" style="
+                        position: absolute; 
+                        z-index: 1000; 
+                        background: rgba(0, 0, 0, 0.85); 
+                        color: white; 
+                        padding: 8px 12px; 
+                        border-radius: 4px; 
+                        font-family: 'Inter', sans-serif;
+                        font-size: 13px;
+                        pointer-events: none;
+                        display: none;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                    ">
+                        <span style="color: #ffd700; font-weight: bold;" id="hover-tons">0</span> Tons
+                    </div>
+
+                    <div id="north-arrow" style="
+                        position: absolute;
+                        top: 20px;
+                        right: 20px;
+                        z-index: 1000;
+                        pointer-events: none;
+                        background: rgba(255, 255, 255, 0.9);
+                        padding: 8px 10px;
+                        border-radius: 6px;
+                        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+                        text-align: center;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                    ">
+                        <span style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px; color: #222; margin-bottom: 2px;">N</span>
+                        <svg width="16" height="24" viewBox="0 0 16 24">
+                            <path d="M8,0 L16,24 L8,18 L0,24 Z" fill="#d32f2f" />
+                        </svg>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+       <footer class="project-info">
+            <h3>About This Visualization</h3>
+            <p>
+                This interactive heatmap visualizes the density and intensity of aerial bombing operations across the European theater. The "hotter" the color (transitioning toward red), the higher the <strong>total tonnage of explosives</strong> dropped in that specific area during the selected timeframe. Zoom in or pan around to view city and country names, and use the playback controls to watch the campaign unfold over time.
+            </p>
+            <p style="font-size: 0.95em; color: #555; background: #f1f3f5; padding: 10px; border-left: 4px solid #0056b3; border-radius: 4px; margin:1rem 0;">
+                <strong>Note on the Hover Tool:</strong> The mouse tooltip provides a localized estimate by searching a roughly 15-kilometer radius around your cursor. Because of overlapping target coordinates, imperfect historical logging, and spatial rounding, this number is a rough approximation of the regional intensity rather than an exact historical record for a single pinpoint target.
+            </p>
+            <div class="data-source">
+                <strong>Data Source:</strong> THOR (Theater History of Operations Reports) Database, compiled by the US Air Force Research Institute.
+            </div>
+        </footer>
+
     </div>
 
-    <div id="map-container"></div>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-        crossorigin="anonymous"></script>
-        <script src="https://unpkg.com/topojson-client@3"></script>
     <script src="https://cdn.jsdelivr.net/npm/wnumb@1.2.0/wNumb.min.js"></script>
-    <script src="slider.js"></script>
-
     <script src="index.js"></script>
+</body>
 
 </html>
