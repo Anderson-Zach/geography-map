@@ -46,28 +46,32 @@
 
                 <section class="control-section">
                     <h3>Playback</h3>
-                    <button class="btn btn-primary" id="play-btn" onclick="togglePlayback()">
-                        <span id="play-icon">▶</span> <span id="play-text">Play Timelapse</span>
-                    </button>
-                    <button class="btn btn-secondary" onclick="resetView()">
-                        ↻ Reset View
-                    </button>
+                    <div class="button-group">
+                        <button class="btn btn-primary" id="play-btn" onclick="togglePlayback()">
+                            <span id="play-icon">▶</span> <span id="play-text">Play</span>
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetView()">
+                            ↻ Reset
+                        </button>
+                    </div>
                 </section>
 
 
                 <section class="stats-panel">
                     <h3>Statistics</h3>
-                    <div class="stat-item">
-                        <div class="stat-label">Operations</div>
-                        <div class="stat-value" id="operations-count">0</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Total Tons Dropped</div>
-                        <div class="stat-value" id="total-tons">0</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Peak Tonnage (1 Spot)</div>
-                        <div class="stat-value" id="peak-intensity">0</div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">Operations</div>
+                            <div class="stat-value" id="operations-count">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Total Tons</div>
+                            <div class="stat-value" id="total-tons">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Peak Tonnage</div>
+                            <div class="stat-value" id="peak-intensity">0</div>
+                        </div>
                     </div>
                 </section>
 
@@ -97,7 +101,7 @@
             <main class="map-section">
                 <div id="map-container">
                     <div id="base-map"></div>
-                    
+
                     <div id="hover-tooltip" style="
                         position: absolute; 
                         z-index: 1000; 
@@ -129,7 +133,8 @@
                         flex-direction: column;
                         align-items: center;
                     ">
-                        <span style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px; color: #222; margin-bottom: 2px;">N</span>
+                        <span
+                            style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px; color: #222; margin-bottom: 2px;">N</span>
                         <svg width="16" height="24" viewBox="0 0 16 24">
                             <path d="M8,0 L16,24 L8,18 L0,24 Z" fill="#d32f2f" />
                         </svg>
@@ -138,16 +143,25 @@
             </main>
         </div>
 
-       <footer class="project-info">
+        <footer class="project-info">
             <h3>About This Visualization</h3>
             <p>
-                This interactive heatmap visualizes the density and intensity of aerial bombing operations across the European theater. The "hotter" the color (transitioning toward red), the higher the <strong>total tonnage of explosives</strong> dropped in that specific area during the selected timeframe. Zoom in or pan around to view city and country names, and use the playback controls to watch the campaign unfold over time.
+                This interactive heatmap visualizes the density and intensity of aerial bombing operations across the
+                European theater. The "hotter" the color (transitioning toward red), the higher the <strong>total
+                    tonnage of explosives</strong> dropped in that specific area during the selected timeframe. Zoom in
+                or pan around to view city and country names, and use the playback controls to watch the campaign unfold
+                over time.
             </p>
-            <p style="font-size: 0.95em; color: #555; background: #f1f3f5; padding: 10px; border-left: 4px solid #0056b3; border-radius: 4px; margin:1rem 0;">
-                <strong>Note on the Hover Tool:</strong> The mouse tooltip provides a localized estimate by searching a roughly 15-kilometer radius around your cursor. Because of overlapping target coordinates, imperfect historical logging, and spatial rounding, this number is a rough approximation of the regional intensity rather than an exact historical record for a single pinpoint target.
+            <p
+                style="font-size: 0.95em; color: #555; background: #f1f3f5; padding: 10px; border-left: 4px solid #0056b3; border-radius: 4px; margin:1rem 0;">
+                <strong>Note on the Hover Tool:</strong> The mouse tooltip provides a localized estimate by searching a
+                roughly 15-kilometer radius around your cursor. Because of overlapping target coordinates, imperfect
+                historical logging, and spatial rounding, this number is a rough approximation of the regional intensity
+                rather than an exact historical record for a single pinpoint target.
             </p>
             <div class="data-source">
-                <strong>Data Source:</strong> THOR (Theater History of Operations Reports) Database, compiled by the US Air Force Research Institute.
+                <strong>Data Source:</strong> THOR (Theater History of Operations Reports) Database, compiled by the US
+                Air Force Research Institute.
             </div>
         </footer>
 

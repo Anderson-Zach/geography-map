@@ -165,7 +165,8 @@ h1 {
 
 /* Buttons */
 .btn {
-    width: 100%;
+    width: 48%;
+    height: 100%;
     padding: 0.75rem 1.2rem;
     font-family: 'Inter', sans-serif;
     font-size: 0.9rem;
@@ -210,32 +211,40 @@ h1 {
     border-bottom: 1px solid var(--border-color);
 }
 
+.stats-grid {
+    display: grid;
+    /* This creates a grid that automatically wraps when items get below 140px */
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+}
+
 .stat-item {
     display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 1rem;
+    flex-direction: column; /* Stack label over value for better vertical fit */
+    justify-content: center;
+    align-items: flex-start;
     padding: 0.75rem;
     background: var(--bg-secondary);
     border-radius: 6px;
     border-left: 3px solid var(--accent-color);
-}
-
-.stat-item:last-child {
-    margin-bottom: 0;
+    margin-bottom: 0; /* Let the grid handle the spacing */
 }
 
 .stat-label {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    font-weight: 500;
+    font-size: 0.65rem; /* Slightly smaller to ensure it doesn't wrap */
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
 }
 
 .stat-value {
-    font-size: 1.5rem;
+    font-size: 1.2rem; /* Adjusted size for better fitting */
     color: var(--text-primary);
     font-weight: 700;
     letter-spacing: -0.02em;
+    white-space: nowrap; /* Prevents numbers from breaking into two lines */
 }
 
 /* Legend */
@@ -266,8 +275,8 @@ h1 {
     position: relative;
     width:100%;
     max-width: 900px;
-    height: 600px;
-    max-height: 80%;
+    height: 900px;
+    max-height: 90vh;
     margin: 0 auto;
     background: #fafafa;
     border: 1px solid var(--border-color);

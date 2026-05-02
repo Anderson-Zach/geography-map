@@ -233,7 +233,7 @@ function togglePlayback() {
         startTimelapse();
     } else {
         playIcon.textContent = '▶';
-        playText.textContent = 'Play Timelapse';
+        playText.textContent = 'Play';
         stopTimelapse();
     }
 }
