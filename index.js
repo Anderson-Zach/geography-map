@@ -4,7 +4,7 @@ let timelapseActive = false;
 let timelapseInterval;
 let updateTimeout;
 
-const globalMaxDensity = 1500; 
+const globalMaxDensity = 1500;
 
 function debounce(func, wait) {
     return function executedFunction(...args) {
@@ -21,21 +21,21 @@ async function init() {
     try {
         map = L.map('base-map').setView([48.0, 10.0], 5);
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap &copy; CARTO',
-            subdomains: 'abcd',
-            maxZoom: 10
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+            maxZoom: 19
         }).addTo(map);
+
 
         L.control.scale({ imperial: true, position: 'bottomright' }).addTo(map);
 
         heatLayer = L.heatLayer([], {
-            radius: 15,            
-            blur: 20,              
-            maxZoom: 10,           
-            max: globalMaxDensity, 
+            radius: 15,
+            blur: 20,
+            maxZoom: 10,
+            max: globalMaxDensity,
             gradient: {
-                0.0: 'rgba(0,0,255,0)', 
+                0.0: 'rgba(0,0,255,0)',
                 0.2: 'blue',
                 0.4: 'cyan',
                 0.6: 'yellow',
@@ -47,20 +47,20 @@ async function init() {
         rawData = await d3.json("operations.json");
 
 
-        map.on('mousemove', function(e) {
+        map.on('mousemove', function (e) {
             if (!aggregatedPoints.length) return;
 
             const tooltip = document.getElementById('hover-tooltip');
             const mouseLat = e.latlng.lat;
             const mouseLng = e.latlng.lng;
-            
-            const searchRadius = 0.15; 
+
+            const searchRadius = 0.15;
             let localTons = 0;
 
             for (let i = 0; i < aggregatedPoints.length; i++) {
                 const pt = aggregatedPoints[i];
                 if (Math.abs(pt.lat - mouseLat) < searchRadius && Math.abs(pt.lon - mouseLng) < searchRadius) {
-                    localTons += pt.count; 
+                    localTons += pt.count;
                 }
             }
 
@@ -75,7 +75,7 @@ async function init() {
         });
 
         // Hide tooltip when mouse leaves the map completely
-        map.on('mouseout', function() {
+        map.on('mouseout', function () {
             document.getElementById('hover-tooltip').style.display = 'none';
         });
 
@@ -89,7 +89,7 @@ async function init() {
 
 function initSlider() {
     const dateSlider = document.getElementById('slider-date');
-    
+
     function timestamp(str) {
         return new Date(str).getTime() / 1000;
     }
@@ -134,11 +134,11 @@ function initSlider() {
 
 function filterData(data) {
     if (!window.dateSlider || !window.dateSlider.noUiSlider) return data;
-    
+
     const values = window.dateSlider.noUiSlider.get();
     const startDate = +values[0];
     const endDate = +values[1];
-    
+
     return data.filter(item => {
         return item[0] >= startDate && item[0] <= endDate;
     });
@@ -151,7 +151,7 @@ function updateData() {
 
     const groupedData = d3.rollup(
         cleanData,
-        v => d3.sum(v, d => d[3]), 
+        v => d3.sum(v, d => d[3]),
         d => Math.round(d[1] * 100) / 100, // Longitude
         d => Math.round(d[2] * 100) / 100  // Latitude
     );
@@ -171,8 +171,8 @@ function drawHeatmap() {
     if (!heatLayer || !aggregatedPoints.length) return;
 
     const leafletPoints = aggregatedPoints.map(point => [
-        point.lat, 
-        point.lon, 
+        point.lat,
+        point.lon,
         point.count
     ]);
 
@@ -181,7 +181,7 @@ function drawHeatmap() {
 
 function updateStats(operationsCount) {
     document.getElementById('operations-count').textContent = operationsCount.toLocaleString();
-    
+
     if (aggregatedPoints.length > 0) {
         const totalTons = d3.sum(aggregatedPoints, d => d.count);
         document.getElementById('total-tons').textContent = Math.round(totalTons).toLocaleString();
@@ -213,11 +213,11 @@ function togglePlayback() {
 
 function startTimelapse() {
     if (!window.dateSlider || !window.dateSlider.noUiSlider) return;
-    
+
     const absoluteMax = window.dateSlider.noUiSlider.options.range.max;
     const currentValues = window.dateSlider.noUiSlider.get();
-    const leftHandle = parseFloat(currentValues[0]); 
-    let rightHandle = parseFloat(currentValues[1]);  
+    const leftHandle = parseFloat(currentValues[0]);
+    let rightHandle = parseFloat(currentValues[1]);
 
     // Restart from left handle if already at the end
     if (rightHandle >= absoluteMax) {
@@ -235,7 +235,7 @@ function startTimelapse() {
         if (currentTime > absoluteMax) {
             currentTime = absoluteMax;
             window.dateSlider.noUiSlider.set([leftHandle, currentTime]);
-            togglePlayback(); 
+            togglePlayback();
             return;
         }
 
